@@ -111,11 +111,12 @@ class TicTacToeState(State):
     player - the index of the player who has the move.
     '''
    
-    num_rows = 3
-    num_cols = 3
     num_players = 2
 
-    def __init__(self, board=None):
+    def __init__(self, board=None, dims = (3,3)):
+        num_rows, num_cols = dims
+        self.num_rows = num_rows
+        self.num_cols = num_cols
         if board:
             self.board = copy.deepcopy(board)
         else:
@@ -173,11 +174,12 @@ class TicTacToeState(State):
             for j in range(self.num_cols):
                 if all([self.board[i][j] == p for i in range(self.num_rows)]):
                     return p
-            #Check for diagonals
-            if all([self.board[i][i] == p for i in range(self.num_rows)]):
-                return p
-            if all([self.board[i][2-i] == p for i in range(self.num_rows)]):
-                return p
+            #Check for diagonals (code only works with square boards)
+            if self.num_rows == self.num_cols:
+                if all([self.board[i][i] == p for i in range(self.num_rows)]):
+                    return p
+                if all([self.board[i][self.num_rows-i-1] == p for i in range(self.num_rows)]):
+                    return p
         return -1
 
     def full_board(self):
@@ -267,13 +269,16 @@ class Human(Agent):
         while not successful_input:
             response = input("Which action would you like to take (Enter # or action)? ")
             #WARNING: The following code is dangerous
-            response_eval = eval(response) 
-            for i in range(len(poss_actions)):
-                if response == str(i) or response == str(poss_actions[i]) or response_eval == poss_actions[i]:
-                    action = poss_actions[i]
-                    successful_input = True 
-                    break
-            else:
+            try:
+                response_eval = eval(response) 
+                for i in range(len(poss_actions)):
+                    if response == str(i) or response == str(poss_actions[i]) or response_eval == poss_actions[i]:
+                        action = poss_actions[i]
+                        successful_input = True 
+                        break
+            except:
+                pass
+            if not successful_input:
                 print("Invalid input.")
         return action
 
